@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Stacker crop calibrator</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 16px;
+    color: #1a1a1a;
+    background: #fafafa;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  p.sub { color: #555; font-size: 14px; margin-top: 0; }
+  #canvas {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    max-width: 100%;
+    touch-action: none;
+    cursor: default;
+    background: #eee;
+  }
+  #rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  #rows label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #555;
+  }
+  #rows input {
+    width: 64px;
+    height: 26px;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+  button {
+    height: 32px;
+    padding: 0 14px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+  }
+  button:hover { background: #f0f0f0; }
+  textarea {
+    width: 100%;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    box-sizing: border-box;
+    margin-top: 8px;
+  }
+  input[type="file"] { margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<h1>Stacker crop calibrator</h1>
+<p class="sub">Open a snapshot from your camera, drag each box onto its parking space, then export the coordinates.</p>
+
+<input type="file" id="file-input" accept="image/*" />
+<div style="position:relative;display:inline-block;max-width:100%;">
+  <canvas id="canvas"></canvas>
+</div>
+
+<div id="rows"></div>
+
+<div style="display:flex;gap:8px;margin-bottom:8px;">
+  <button id="export-btn">Generate code</button>
+  <button id="copy-btn">Copy</button>
+</div>
+<textarea id="output" readonly rows="10" style="display:none;"></textarea>
+
+<script>
+const spaces = [
+  { id: "S1-L1", stacker: 1, level: 1, left: 0, top: 700, width: 400, height: 200 },
+  { id: "S1-L2", stacker: 1, level: 2, left: 0, top: 500, width: 400, height: 200 },
+  { id: "S1-L3", stacker: 1, level: 3, left: 0, top: 300, width: 400, height: 200 },
+  { id: "S1-L4", stacker: 1, level: 4, left: 0, top: 100, width: 400, height: 200 },
+  { id: "S2-L1", stacker: 2, level: 1, left: 500, top: 700, width: 400, height: 200 },
+  { id: "S3-L1", stacker: 3, level: 1, left: 1000, top: 700, width: 400, height: 200 }
+];
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const fileInput = document.getElementById("file-input");
+const rowsEl = document.getElementById("rows");
+const output = document.getElementById("output");
+
+let img = null;
+let scale = 1;
+let drag = null;
+const handleSize = 10;
+
+function buildRows() {
+  rowsEl.innerHTML = "";
+  spaces.forEach((s, i) => {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;";
+    row.innerHTML = '<span style="width:52px;color:#555;">' + s.id + '</span>' +
+      ['left', 'top', 'width', 'height'].map(function(k) {
+        return '<label>' + k[0].toUpperCase() +
+          '<input type="number" data-i="' + i + '" data-k="' + k + '" value="' + s[k] + '" /></label>';
+      }).join("");
+    rowsEl.appendChild(row);
+  });
+  rowsEl.querySelectorAll("input").forEach(function(inp) {
+    inp.addEventListener("input", function() {
+      const i = Number(inp.dataset.i);
+      const k = inp.dataset.k;
+      const s = spaces[i];
+      s[k] = Number(inp.value) || 0;
+      if (img) {
+        if (k === "left") s.left = Math.min(Math.max(0, s.left), img.naturalWidth - s.width);
+        if (k === "top") s.top = Math.min(Math.max(0, s.top), img.naturalHeight - s.height);
+        if (k === "width") s.width = Math.min(Math.max(10, s.width), img.naturalWidth - s.left);
+        if (k === "height") s.height = Math.min(Math.max(10, s.height), img.naturalHeight - s.top);
+      }
+      draw();
+    });
+  });
+}
+
+function syncRowInputs() {
+  rowsEl.querySelectorAll("input").forEach(function(inp) {
+    const i = Number(inp.dataset.i);
+    const k = inp.dataset.k;
+    if (document.activeElement !== inp) inp.value = Math.round(spaces[i][k]);
+  });
+}
+
+function draw() {
+  if (!img) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  spaces.forEach(function(s) {
+    const x = s.left * scale, y = s.top * scale, w = s.width * scale, h = s.height * scale;
+    ctx.fillStyle = "rgba(55,138,221,0.15)";
+    ctx.strokeStyle = "#378ADD";
+    ctx.lineWidth = 2;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = "#042C53";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(s.id, x + 4, y + 14);
+    ctx.fillStyle = "#378ADD";
+    ctx.fillRect(x + w - handleSize, y + h - handleSize, handleSize, handleSize);
+  });
+  syncRowInputs();
+}
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const image = new Image();
+    image.onload = function() {
+      img = image;
+      const maxWidth = 640;
+      scale = Math.min(1, maxWidth / image.naturalWidth);
+      canvas.width = image.naturalWidth * scale;
+      canvas.height = image.naturalHeight * scale;
+      spaces.forEach(function(s) {
+        s.width = Math.min(s.width, image.naturalWidth);
+        s.height = Math.min(s.height, image.naturalHeight);
+        s.left = Math.min(Math.max(0, s.left), image.naturalWidth - s.width);
+        s.top = Math.min(Math.max(0, s.top), image.naturalHeight - s.height);
+      });
+      draw();
+    };
+    image.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+fileInput.addEventListener("change", function(e) {
+  if (e.target.files[0]) loadImage(e.target.files[0]);
+});
+
+function hitTest(px, py) {
+  for (let i = spaces.length - 1; i >= 0; i--) {
+    const s = spaces[i];
+    const x = s.left * scale, y = s.top * scale, w = s.width * scale, h = s.height * scale;
+    const onHandle = px >= x + w - handleSize && px <= x + w + 4 && py >= y + h - handleSize && py <= y + h + 4;
+    if (onHandle) return { index: i, mode: "resize" };
+    if (px >= x && px <= x + w && py >= y && py <= y + h) return { index: i, mode: "move" };
+  }
+  return null;
+}
+
+canvas.addEventListener("pointerdown", function(e) {
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const py = (e.clientY - rect.top) * (canvas.height / rect.height);
+  const hit = hitTest(px, py);
+  if (hit) {
+    canvas.setPointerCapture(e.pointerId);
+    drag = { index: hit.index, mode: hit.mode, lastX: px, lastY: py };
+  }
+});
+
+canvas.addEventListener("pointermove", function(e) {
+  if (!drag) return;
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const py = (e.clientY - rect.top) * (canvas.height / rect.height);
+  const dx = (px - drag.lastX) / scale;
+  const dy = (py - drag.lastY) / scale;
+  const s = spaces[drag.index];
+  if (drag.mode === "move") {
+    s.left = Math.min(Math.max(0, s.left + dx), img.naturalWidth - s.width);
+    s.top = Math.min(Math.max(0, s.top + dy), img.naturalHeight - s.height);
+  } else {
+    s.width = Math.min(Math.max(10, s.width + dx), img.naturalWidth - s.left);
+    s.height = Math.min(Math.max(10, s.height + dy), img.naturalHeight - s.top);
+  }
+  drag.lastX = px;
+  drag.lastY = py;
+  draw();
+});
+
+canvas.addEventListener("pointerup", function() { drag = null; });
+canvas.addEventListener("pointercancel", function() { drag = null; });
+
+document.getElementById("export-btn").addEventListener("click", function() {
+  const lines = spaces.map(function(s) {
+    return '    {\n        id: "' + s.id + '",\n        stacker: ' + s.stacker + ',\n        level: ' + s.level +
+      ',\n        crop: { left: ' + Math.round(s.left) + ', top: ' + Math.round(s.top) + ', width: ' + Math.round(s.width) + ', height: ' + Math.round(s.height) + ' }\n    }';
+  });
+  output.value = "const parkingSpaces = [\n" + lines.join(",\n") + "\n];";
+  output.style.display = "block";
+});
+
+document.getElementById("copy-btn").addEventListener("click", function() {
+  if (!output.value) return;
+  navigator.clipboard.writeText(output.value).catch(function() {});
+  output.select();
+});
+
+buildRows();
+</script>
+</body>
+</html>
