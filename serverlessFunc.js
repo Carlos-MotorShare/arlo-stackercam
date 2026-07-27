@@ -361,25 +361,65 @@ Rules:
     return JSON.parse(response.text);
 }
 
-export default async function handler(req, res) {
-    if (req.method !== "GET" && req.method !== "POST") {
-        return res.status(405).json({ error: "Method not allowed" });
+
+// FOR VERCEL SERVERLESS DEPLOYMENT: This is the entry point for the serverless function. It handles GET and POST requests, retrieves the source image (either from Home Assistant or a local test file), normalizes its orientation, analyzes the parking spaces, and returns the results in JSON format. If any errors occur during processing, it responds with an appropriate error message and status code.
+// export default async function handler(req, res) {
+//     if (req.method !== "GET" && req.method !== "POST") {
+//         return res.status(405).json({ error: "Method not allowed" });
+//     }
+
+//     try {
+//         const rawImage = await getSourceImage(req);
+//         const image = await normalizeOrientation(rawImage);
+//         const results = await analyseParkingSpaces(image);
+
+//         return res.status(200).json({
+//             timestamp: new Date().toISOString(),
+//             cars: results
+//         });
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ error: err.message });
+//     }
+// }
+
+
+
+// FOR CLOUD FLARE WORKERS DEPLOYMENT: This is the entry point for the serverless function. It handles GET and POST requests, retrieves the source image (either from Home Assistant or a local test file), normalizes its orientation, analyzes the parking spaces, and returns the results in JSON format. If any errors occur during processing, it responds with an appropriate error message and status code.
+export default {
+  async fetch(request, env, ctx) {
+    if (request.method !== "GET" && request.method !== "POST") {
+      return Response.json(
+        { error: "Method not allowed" },
+        { status: 405 }
+      );
     }
 
     try {
-        const rawImage = await getSourceImage(req);
-        const image = await normalizeOrientation(rawImage);
-        const results = await analyseParkingSpaces(image);
+      const rawImage = await getSourceImage(request);
+      const image = await normalizeOrientation(rawImage);
+      const results = await analyseParkingSpaces(image);
 
-        return res.status(200).json({
-            timestamp: new Date().toISOString(),
-            cars: results
-        });
+      return Response.json(
+        {
+          timestamp: new Date().toISOString(),
+          cars: results,
+        },
+        { status: 200 }
+      );
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: err.message });
+      console.error(err);
+
+      return Response.json(
+        {
+          error: err instanceof Error ? err.message : String(err),
+        },
+        { status: 500 }
+      );
     }
-}
+  },
+};
+
 
 // FOR LOCAL TESTING ONLY: Uncomment the following lines to run this script directly with Node.js
 
