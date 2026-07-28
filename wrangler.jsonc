@@ -1,5 +1,8 @@
 {
   "name": "arlo-stackercam",
-  "main": "serverlessFunc.js",       // ← change to your actual entry file
-  "compatibility_date": "2026-07-28"
+  "main": "serverlessFunc.js",
+  "compatibility_date": "2026-07-28",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
 }
