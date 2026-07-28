@@ -52,9 +52,6 @@ import {
 
 const CAMERA_ENTITY = "camera.aarlo_stacker_cam";
 
-const CACHE_KEY = "analysis:latest";
-const CACHE_TTL_SECONDS = 900; // 15 minutes
-
 /*
 =========================================
 PARKING SPACE CONFIGURATION
@@ -453,8 +450,19 @@ export default {
                 { status: 405 }
             );
         }
+
+        const token = request.headers.get("X-API-Key");
+
+        if (token !== env.API_SECRET) {
+            return new Response("Unauthorized", {
+                status: 401
+            });
+        }
  
         try {
+            const CACHE_KEY = "analysis:latest";
+            const CACHE_TTL_SECONDS = 900; // 15 minutes
+
             // 1. Check cache first
             const cached = await env.CACHE_KV.get(CACHE_KEY, "json");
             if (cached) {
