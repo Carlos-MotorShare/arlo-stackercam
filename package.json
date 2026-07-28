@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@cf-wasm/photon": "^0.3.7",
     "@google/genai": "^2.13.0",
     "arlo-api": "^1.0.11",
     "axios": "^1.18.1",
