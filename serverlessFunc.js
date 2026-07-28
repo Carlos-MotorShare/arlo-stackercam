@@ -199,8 +199,24 @@ async function loadTestImage() {
 
 // Single entry point that decides whether to hit Home Assistant or use the
 // local test file, based on the USE_TEST_IMAGE env var or a ?test=true query param.
-async function getSourceImage(req) {
-    const wantsTestImage = USE_TEST_IMAGE || req?.query?.test === "true";
+
+// VERCEL FORMAT
+// async function getSourceImage(req) {
+//     const wantsTestImage = USE_TEST_IMAGE || req?.query?.test === "true";
+
+//     if (wantsTestImage) {
+//         return await loadTestImage();
+//     }
+
+//     return await waitForFreshSnapshot();
+// }
+
+// CLAUD FLARE WORKERS FORMAT
+async function getSourceImage(request) {
+    const url = new URL(request.url);
+
+    const wantsTestImage =
+        USE_TEST_IMAGE || url.searchParams.get("test") === "true";
 
     if (wantsTestImage) {
         return await loadTestImage();
