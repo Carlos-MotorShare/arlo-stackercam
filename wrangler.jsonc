@@ -1,6 +1,6 @@
 {
   "name": "arlo-stackercam",
-  "main": "serverlessFunc.js",
+  "main": "main.js",
   "compatibility_date": "2026-07-28",
   "compatibility_flags": [
     "nodejs_compat"
