@@ -52,6 +52,9 @@ import {
 
 const CAMERA_ENTITY = "camera.aarlo_stacker_cam";
 
+const CACHE_KEY = "analysis:latest";
+const CACHE_TTL_SECONDS = 900; // 15 minutes
+
 /*
 =========================================
 PARKING SPACE CONFIGURATION
@@ -450,21 +453,34 @@ export default {
                 { status: 405 }
             );
         }
-
+ 
         try {
+            // 1. Check cache first
+            const cached = await env.CACHE_KV.get(CACHE_KEY, "json");
+            if (cached) {
+                return Response.json(cached, { status: 200 });
+            }
+ 
+            // 2. No cached result (or it expired) — do the real work
             const imageBytes = await getSourceImage(request, env);
             const results = await analyseParkingSpaces(imageBytes, env);
-
-            return Response.json(
-                {
-                    timestamp: new Date().toISOString(),
-                    cars: results,
-                },
-                { status: 200 }
+ 
+            const payload = {
+                timestamp: new Date().toISOString(),
+                cars: results,
+            };
+ 
+            // 3. Store for next 15 minutes (don't block the response on this)
+            ctx.waitUntil(
+                env.CACHE_KV.put(CACHE_KEY, JSON.stringify(payload), {
+                    expirationTtl: CACHE_TTL_SECONDS,
+                })
             );
+ 
+            return Response.json(payload, { status: 200 });
         } catch (err) {
             console.error(err);
-
+ 
             return Response.json(
                 {
                     error: err instanceof Error ? err.message : String(err),

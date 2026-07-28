@@ -1,8 +1,14 @@
 {
-  "name": "arlo-stackercam",
-  "main": "main.js",
-  "compatibility_date": "2026-07-28",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+	"name": "arlo-stackercam",
+	"main": "main.js",
+	"compatibility_date": "2026-07-28",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"kv_namespaces": [
+		{
+			"binding": "CACHE_KV",
+			"id": "e8e61a987fed4c8882ebc45e9b35ca27"
+		}
+	]
 }
