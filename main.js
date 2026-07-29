@@ -278,7 +278,7 @@ async function requestSnapshot(env) {
     console.log("Requesting snapshot...");
 
     const res = await fetch(
-        `${env.HOME_ASSISTANT_URL}/api/services/aarlo/camera_request_snapshot`,
+        `${env.HOME_ASSISTANT_URL_NGROK}/api/services/aarlo/camera_request_snapshot`,
         {
             method: "POST",
             headers: haHeaders(env),
@@ -316,7 +316,7 @@ async function hashBytes(arrayBuffer) {
 
 async function getSnapshotBytes(env) {
     const res = await fetch(
-        `${env.HOME_ASSISTANT_URL}/api/camera_proxy/${CAMERA_ENTITY}`,
+        `${env.HOME_ASSISTANT_URL_NGROK}/api/camera_proxy/${CAMERA_ENTITY}`,
         { headers: haHeaders(env) }
     );
 
