@@ -293,7 +293,7 @@ async function requestSnapshot(env) {
 
 async function getCameraState(env) {
     const res = await fetch(
-        `${env.HOME_ASSISTANT_URL}/api/states/${CAMERA_ENTITY}`,
+        `${env.HOME_ASSISTANT_URL_NGROK}/api/states/${CAMERA_ENTITY}`,
         { headers: haHeaders(env) }
     );
 
