@@ -76,42 +76,189 @@ crop height
 =========================================
 */
 
+// const parkingSpaces = [
+//     {
+//         id: "S1-L1",
+//         stacker: 1,
+//         level: 1,
+//         crop: { left: 95, top: 2555, width: 811, height: 827 }
+//     },
+//     {
+//         id: "S1-L2",
+//         stacker: 1,
+//         level: 2,
+//         crop: { left: 92, top: 1889, width: 859, height: 531 }
+//     },
+//     {
+//         id: "S1-L3",
+//         stacker: 1,
+//         level: 3,
+//         crop: { left: 103, top: 1259, width: 814, height: 465 }
+//     },
+//     {
+//         id: "S1-L4",
+//         stacker: 1,
+//         level: 4,
+//         crop: { left: 123, top: 874, width: 779, height: 325 }
+//     },
+//     {
+//         id: "S2-L1",
+//         stacker: 2,
+//         level: 1,
+//         crop: { left: 1152, top: 2562, width: 943, height: 721 }
+//     },
+//     {
+//         id: "S3-L1",
+//         stacker: 3,
+//         level: 1,
+//         crop: { left: 2234, top: 2627, width: 718, height: 654 }
+//     }
+// ];
+
 const parkingSpaces = [
     {
         id: "S1-L1",
         stacker: 1,
         level: 1,
-        crop: { left: 95, top: 2555, width: 811, height: 827 }
+        crop: { left: 19, top: 969, width: 400, height: 200 }
     },
     {
         id: "S1-L2",
         stacker: 1,
         level: 2,
-        crop: { left: 92, top: 1889, width: 859, height: 531 }
+        crop: { left: 0, top: 689, width: 400, height: 210 }
     },
     {
         id: "S1-L3",
         stacker: 1,
         level: 3,
-        crop: { left: 103, top: 1259, width: 814, height: 465 }
+        crop: { left: 0, top: 435, width: 400, height: 200 }
     },
     {
         id: "S1-L4",
         stacker: 1,
         level: 4,
-        crop: { left: 123, top: 874, width: 779, height: 325 }
+        crop: { left: 0, top: 137, width: 400, height: 200 }
     },
     {
         id: "S2-L1",
         stacker: 2,
         level: 1,
-        crop: { left: 1152, top: 2562, width: 943, height: 721 }
+        crop: { left: 450, top: 996, width: 400, height: 223 }
+    },
+    {
+        id: "S2-L2",
+        stacker: 2,
+        level: 2,
+        crop: { left: 419, top: 705, width: 400, height: 231 }
+    },
+    {
+        id: "S2-L3",
+        stacker: 2,
+        level: 3,
+        crop: { left: 425, top: 396, width: 391, height: 254 }
+    },
+    {
+        id: "S2-L4",
+        stacker: 2,
+        level: 4,
+        crop: { left: 425, top: 91, width: 400, height: 200 }
     },
     {
         id: "S3-L1",
         stacker: 3,
         level: 1,
-        crop: { left: 2234, top: 2627, width: 718, height: 654 }
+        crop: { left: 892, top: 1014, width: 398, height: 269 }
+    },
+    {
+        id: "S3-L2",
+        stacker: 3,
+        level: 2,
+        crop: { left: 867, top: 683, width: 402, height: 275 }
+    },
+    {
+        id: "S3-L3",
+        stacker: 3,
+        level: 3,
+        crop: { left: 841, top: 369, width: 435, height: 233 }
+    },
+    {
+        id: "S3-L4",
+        stacker: 3,
+        level: 4,
+        crop: { left: 858, top: 32, width: 400, height: 200 }
+    },
+    {
+        id: "S4-L1",
+        stacker: 4,
+        level: 1,
+        crop: { left: 1372, top: 952, width: 398, height: 286 }
+    },
+    {
+        id: "S4-L2",
+        stacker: 4,
+        level: 2,
+        crop: { left: 1397, top: 609, width: 417, height: 296 }
+    },
+    {
+        id: "S4-L3",
+        stacker: 4,
+        level: 3,
+        crop: { left: 1383, top: 322, width: 453, height: 251 }
+    },
+    {
+        id: "S4-L4",
+        stacker: 4,
+        level: 4,
+        crop: { left: 1379, top: 59, width: 457, height: 221 }
+    },
+    {
+        id: "S5-L1",
+        stacker: 5,
+        level: 1,
+        crop: { left: 1825, top: 990, width: 353, height: 238 }
+    },
+    {
+        id: "S5-L2",
+        stacker: 5,
+        level: 2,
+        crop: { left: 1885, top: 633, width: 333, height: 291 }
+    },
+    {
+        id: "S5-L3",
+        stacker: 5,
+        level: 3,
+        crop: { left: 1932, top: 340, width: 328, height: 262 }
+    },
+    {
+        id: "S5-L4",
+        stacker: 5,
+        level: 4,
+        crop: { left: 1941, top: 89, width: 351, height: 226 }
+    },
+    {
+        id: "S6-L1",
+        stacker: 6,
+        level: 1,
+        crop: { left: 2204, top: 962, width: 240, height: 247 }
+    },
+    {
+        id: "S6-L2",
+        stacker: 6,
+        level: 2,
+        crop: { left: 2258, top: 700, width: 208, height: 211 }
+    },
+    {
+        id: "S6-L3",
+        stacker: 6,
+        level: 3,
+        crop: { left: 2263, top: 384, width: 255, height: 237 }
+    },
+    {
+        id: "S6-L4",
+        stacker: 6,
+        level: 4,
+        crop: { left: 2319, top: 151, width: 218, height: 216 }
     }
 ];
 

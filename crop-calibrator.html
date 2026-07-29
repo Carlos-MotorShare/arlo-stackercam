@@ -80,14 +80,33 @@
 <textarea id="output" readonly rows="10" style="display:none;"></textarea>
 
 <script>
-const spaces = [
-  { id: "S1-L1", stacker: 1, level: 1, left: 0, top: 700, width: 400, height: 200 },
-  { id: "S1-L2", stacker: 1, level: 2, left: 0, top: 500, width: 400, height: 200 },
-  { id: "S1-L3", stacker: 1, level: 3, left: 0, top: 300, width: 400, height: 200 },
-  { id: "S1-L4", stacker: 1, level: 4, left: 0, top: 100, width: 400, height: 200 },
-  { id: "S2-L1", stacker: 2, level: 1, left: 500, top: 700, width: 400, height: 200 },
-  { id: "S3-L1", stacker: 3, level: 1, left: 1000, top: 700, width: 400, height: 200 }
-];
+const spaces = [];
+
+const STACKERS = 6;
+const LEVELS = 4;
+
+// Starting dummy layout
+const START_LEFT = 0;
+const START_TOP = 100;
+const STACKER_SPACING = 500;
+const LEVEL_SPACING = 220;
+
+const DEFAULT_WIDTH = 400;
+const DEFAULT_HEIGHT = 200;
+
+for (let stacker = 1; stacker <= STACKERS; stacker++) {
+    for (let level = 1; level <= LEVELS; level++) {
+        spaces.push({
+            id: `S${stacker}-L${level}`,
+            stacker,
+            level,
+            left: START_LEFT + ((stacker - 1) * STACKER_SPACING),
+            top: START_TOP + ((4 - level) * LEVEL_SPACING),
+            width: DEFAULT_WIDTH,
+            height: DEFAULT_HEIGHT
+        });
+    }
+}
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
